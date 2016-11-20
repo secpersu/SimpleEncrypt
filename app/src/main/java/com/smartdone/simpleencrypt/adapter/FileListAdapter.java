@@ -5,11 +5,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,22 +27,29 @@ public class FileListAdapter extends BaseAdapter {
     private List<File> files;
     private static Bitmap folder;
     private static Bitmap document;
+    private static Bitmap app;
+    private static Bitmap zip;
+    private static Bitmap unknown;
 
     public FileListAdapter(Context context, List<File> files) {
         this.context = context;
         this.files = files;
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.document);
+        folder = zoomBitmap(R.drawable.le_folder);
+        document = zoomBitmap(R.drawable.le_file);
+        app = zoomBitmap(R.drawable.le_apps);
+        zip = zoomBitmap(R.drawable.le_zip);
+        unknown = zoomBitmap(R.drawable.le_unknown);
+    }
+
+    private Bitmap zoomBitmap(int id){
+        Bitmap ret;
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), id);
         int width = bitmap.getWidth();
         float scale = 72f/width;
         Matrix matrix = new Matrix();
         matrix.postScale(scale,scale);
-        document = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-        Bitmap bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.folder);
-        width = bitmap.getWidth();
-        scale = 72f/width;
-        Matrix matrix1 = new Matrix();
-        matrix1.postScale(scale,scale);
-        folder = Bitmap.createBitmap(bitmap1, 0, 0, bitmap1.getWidth(), bitmap1.getHeight(), matrix1, true);
+        ret = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        return ret;
     }
 
     @Override
@@ -65,15 +72,32 @@ public class FileListAdapter extends BaseAdapter {
         View v = LayoutInflater.from(context).inflate(R.layout.list_item, null);
         ImageView imageView = (ImageView) v.findViewById(R.id.iv_icon);
         TextView textView = (TextView) v.findViewById(R.id.tv_filename);
+        CheckBox checkBox = (CheckBox) v.findViewById(R.id.cb_selected);
         textView.setText(files.get(i).getName());
         if(files.get(i).isDirectory()) {
-
             imageView.setImageBitmap(folder);
-            textView.setTextColor(Color.BLUE);
-        }else{
-            imageView.setImageBitmap(document);
             textView.setTextColor(Color.BLACK);
+            checkBox.setVisibility(View.INVISIBLE);
+        }else{
+            if(files.get(i).getName().contains(".")) {
+                String prefix = files.get(i).getName().substring(files.get(i).getName().indexOf("."));
+                if (prefix.equals(".apk")) {
+                    imageView.setImageBitmap(app);
+                } else if (prefix.equals(".txt")) {
+                    imageView.setImageBitmap(document);
+                } else if (prefix.equals(".zip")) {
+                    imageView.setImageBitmap(zip);
+                } else {
+                    imageView.setImageBitmap(unknown);
+                }
+            }else {
+                imageView.setImageBitmap(unknown);
+            }
+
+            textView.setTextColor(Color.BLACK);
+            checkBox.setVisibility(View.VISIBLE);
         }
+
         return v;
     }
 }

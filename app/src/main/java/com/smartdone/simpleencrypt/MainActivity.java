@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.ListViewCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -26,10 +25,10 @@ public class MainActivity extends AppCompatActivity {
     private File root;
     private List<File> files;
 
-    private Handler handler = new Handler(){
+    private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if(msg.what == EncryptTools.SUCCESS) {
+            if (msg.what == EncryptTools.SUCCESS) {
                 if (msg.obj instanceof EncryptMessage) {
                     EncryptMessage emsg = (EncryptMessage) msg.obj;
                     textView.setText(emsg.getOffset() + "/" + emsg.getTotalLength());
@@ -47,7 +46,14 @@ public class MainActivity extends AppCompatActivity {
         root = new File("/sdcard");
         files = new ArrayList<>();
         for (File file : root.listFiles()) {
-            files.add(file);
+            if (file.isDirectory()) {
+                files.add(file);
+            }
+        }
+        for (File file : root.listFiles()) {
+            if (!file.isDirectory()) {
+                files.add(file);
+            }
         }
         ListView listView = (ListView) findViewById(R.id.lv_filelist);
         final FileListAdapter adapter = new FileListAdapter(this, files);
@@ -57,11 +63,24 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 File cfile = (File) adapter.getItem(i);
-                if(cfile.isDirectory()) {
+                if (cfile.isDirectory()) {
                     root = cfile;
                     files.clear();
                     for (File file : root.listFiles()) {
-                        files.add(file);
+                        if (file.isDirectory()) {
+                            files.add(file);
+                        }
+                    }
+                    for (File file : root.listFiles()) {
+                        if (!file.isDirectory()) {
+                            files.add(file);
+                        }
+                    }
+                    if (root.getParentFile() != null) {
+                        if (!root.getParent().equals("/")) {
+                            Log.w("TAG xxx", root.getParent());
+                            files.add(0, root.getParentFile());
+                        }
                     }
                     getSupportActionBar().setTitle(root.getAbsolutePath());
                     adapter.notifyDataSetChanged();
