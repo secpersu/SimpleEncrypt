@@ -1,6 +1,5 @@
 package com.smartdone.simpleencrypt.ui;
 
-import android.support.v4.view.LayoutInflaterCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -8,12 +7,17 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
 import com.smartdone.simpleencrypt.R;
+import com.smartdone.simpleencrypt.adapter.FileListAdapter;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,22 +28,31 @@ public class EnuiActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private ViewPager viewPager;
     private List<View> views;
+    private ListView left;
+    private File root;
+    private List<File> files;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enui);
+        init_widget();
+
+    }
+
+    private void init_widget() {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        drawerToggle = new ActionBarDrawerToggle(this,drawerLayout, toolbar, R.string.open, R.string.close);
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
         drawerToggle.syncState();
-        toolbar.setTitle("xxx");
+        toolbar.setTitle(R.string.filemanager);
         drawerLayout.addDrawerListener(drawerToggle);
         viewPager = (ViewPager) findViewById(R.id.id_pageAdapter);
         views = new ArrayList<>();
         LayoutInflater inflater = LayoutInflater.from(this);
         View v1 = inflater.inflate(R.layout.list, null);
         View v2 = inflater.inflate(R.layout.gird, null);
+        init_left_view(v1);
         views.add(v1);
         views.add(v2);
         PagerAdapter adapter = new PagerAdapter() {
@@ -83,6 +96,51 @@ public class EnuiActivity extends AppCompatActivity {
 
             }
         });
-
     }
+
+    private void init_left_view(View view) {
+        left = (ListView) view.findViewById(R.id.list_filelist);
+        root = new File("/sdcard");
+        files = new ArrayList<>();
+        for (File file : root.listFiles()) {
+            if (file.isDirectory()) {
+                files.add(file);
+            }
+        }
+        for (File file : root.listFiles()) {
+            if (!file.isDirectory()) {
+                files.add(file);
+            }
+        }
+        final FileListAdapter adapter = new FileListAdapter(this, files);
+        left.setAdapter(adapter);
+        left.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                File cfile = (File) adapter.getItem(i);
+                if (cfile.isDirectory()) {
+                    root = cfile;
+                    files.clear();
+                    for (File file : root.listFiles()) {
+                        if (file.isDirectory()) {
+                            files.add(file);
+                        }
+                    }
+                    for (File file : root.listFiles()) {
+                        if (!file.isDirectory()) {
+                            files.add(file);
+                        }
+                    }
+                    if (root.getParentFile() != null) {
+                        if (!root.getParent().equals("/")) {
+                            Log.w("TAG xxx", root.getParent());
+                            files.add(0, root.getParentFile());
+                        }
+                    }
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        });
+    }
+
 }
