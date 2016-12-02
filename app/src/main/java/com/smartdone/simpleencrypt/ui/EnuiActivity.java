@@ -1,5 +1,6 @@
 package com.smartdone.simpleencrypt.ui;
 
+import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.smartdone.simpleencrypt.R;
 import com.smartdone.simpleencrypt.adapter.FileListAdapter;
@@ -21,7 +23,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnuiActivity extends AppCompatActivity {
+
+public class EnuiActivity extends AppCompatActivity implements View.OnClickListener {
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
@@ -31,6 +34,8 @@ public class EnuiActivity extends AppCompatActivity {
     private ListView left;
     private File root;
     private List<File> files;
+    private TextView left_text;
+    private TextView right_text;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +43,11 @@ public class EnuiActivity extends AppCompatActivity {
         setContentView(R.layout.activity_enui);
         init_widget();
 
+    }
+
+    private void resetColor(){
+        left_text.setTextColor(Color.rgb(199,203,214));
+        right_text.setTextColor(Color.rgb(199,203,214));
     }
 
     private void init_widget() {
@@ -48,6 +58,10 @@ public class EnuiActivity extends AppCompatActivity {
         toolbar.setTitle(R.string.filemanager);
         drawerLayout.addDrawerListener(drawerToggle);
         viewPager = (ViewPager) findViewById(R.id.id_pageAdapter);
+        left_text = (TextView) findViewById(R.id.text_page_left);
+        right_text = (TextView) findViewById(R.id.text_page_right);
+        left_text.setOnClickListener(this);
+        right_text.setOnClickListener(this);
         views = new ArrayList<>();
         LayoutInflater inflater = LayoutInflater.from(this);
         View v1 = inflater.inflate(R.layout.list, null);
@@ -88,7 +102,12 @@ public class EnuiActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-
+                resetColor();
+                if(position == 0) {
+                    left_text.setTextColor(Color.WHITE);
+                }else {
+                    right_text.setTextColor(Color.WHITE);
+                }
             }
 
             @Override
@@ -143,4 +162,21 @@ public class EnuiActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.text_page_left:
+                resetColor();
+                left_text.setTextColor(Color.WHITE);
+                viewPager.setCurrentItem(0);
+                break;
+            case R.id.text_page_right:
+                resetColor();
+                right_text.setTextColor(Color.WHITE);
+                viewPager.setCurrentItem(1);
+                break;
+            default:
+                break;
+        }
+    }
 }

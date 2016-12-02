@@ -33,7 +33,7 @@
                 android:orientation="horizontal" >
 
                 <TextView
-                    android:id="@+id/text_page_00"
+                    android:id="@+id/text_page_left"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="center_horizontal|bottom"
@@ -45,7 +45,7 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/text_page_01"
+                    android:id="@+id/text_page_right"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="center_horizontal|bottom"
